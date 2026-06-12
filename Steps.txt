@@ -1,0 +1,14 @@
+Crea y activa el entorno virtual:
+
+
+python -m venv venv
+# En Windows:
+.\venv\Scripts\activate
+
+Instala todo con un solo comando:
+
+pip install -r requirements.txt
+
+Ejecuta 
+
+streamlit run app.py

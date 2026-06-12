@@ -1,0 +1,34 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- Entornos Virtuales ---
+venv/
+env/
+.env
+
+# --- Carpeta de Datos y Trabajo (¡NUEVO!) ---
+# Ignoramos todo el contenido de la carpeta data para proteger 
+# los scripts .sas originales y los .log con métricas sensibles.
+data/*
+
+# PERO creamos una excepción (!) para hacerle seguimiento 
+# únicamente a tu trabajo final validado.
+!data/*_validado.ipynb
+
+# --- Archivos Temporales y Logs Generales ---
+*.ipynb_checkpoints/
+*.log
+*.sas
+temp_runner.py
+
+# --- Datos Crudos (Global) ---
+*.csv
+*.parquet
+*.xlsx
+
+# --- IDEs / Configuración ---
+.vscode/
+.idea/
+.DS_Store
