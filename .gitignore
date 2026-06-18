@@ -15,7 +15,7 @@ data/*
 
 # PERO creamos una excepción (!) para hacerle seguimiento 
 # únicamente a tu trabajo final validado.
-!data/*_validado.ipynb
+!data/*_validad.ipynb
 
 # --- Archivos Temporales y Logs Generales ---
 *.ipynb_checkpoints/

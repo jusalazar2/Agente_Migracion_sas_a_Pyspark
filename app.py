@@ -1,15 +1,19 @@
 import os
 import shutil
 from agente_core import consultar_gemini
-from herramientas import leer_chunk_notebook, actualizar_chunk_notebook, extraer_codigo_python, leer_log_sas, leer_codigo_sas
+from herramientas import leer_chunk_notebook, actualizar_chunk_notebook, extraer_codigo_python, leer_log_sas, leer_codigo_sas, contar_total_chunks
 import streamlit as st
 
 st.set_page_config(page_title="Agente Migración PySpark", page_icon="🤖", layout="wide")
 
+# 1. Inicializamos los nombres por defecto en el estado para que 'contar_total_chunks' no falle al arrancar
+if "archivo_pyspark" not in st.session_state: st.session_state.archivo_pyspark = "nbk_cispc157.ipynb"
+if "archivo_sas" not in st.session_state: st.session_state.archivo_sas = "cispc157.sas"
+if "archivo_log" not in st.session_state: st.session_state.archivo_log = "cispc157.log"
+
 # --- VARIABLES DE ESTADO ---
 if "mensajes" not in st.session_state: st.session_state.mensajes = []
 if "chunk_actual" not in st.session_state: st.session_state.chunk_actual = 0
-if "total_chunks" not in st.session_state: st.session_state.total_chunks = 7
 if "tokens_usados" not in st.session_state: st.session_state.tokens_usados = 0
 if "codigo_pendiente" not in st.session_state: st.session_state.codigo_pendiente = None 
 
@@ -18,20 +22,23 @@ PRESUPUESTO_TOKENS = 5000000
 # --- BARRA LATERAL ---
 with st.sidebar:
     st.header("📊 Archivos de Origen")
-    if "archivo_pyspark" not in st.session_state: st.session_state.archivo_pyspark = "nbk_cispc157.ipynb"
-    if "archivo_sas" not in st.session_state: st.session_state.archivo_sas = "cispc157.sas"
-    if "archivo_log" not in st.session_state: st.session_state.archivo_log = "cispc157.log"
         
     st.session_state.archivo_pyspark = st.text_input("🐍 Notebook PySpark:", value=st.session_state.archivo_pyspark)
     st.session_state.archivo_sas = st.text_input("⚙️ Código SAS Original:", value=st.session_state.archivo_sas)
     st.session_state.archivo_log = st.text_input("📄 Log SAS Referencia:", value=st.session_state.archivo_log)
+    
+    # 2. CONTEO DINÁMICO: Se recalcula cada vez que cambia el texto de la caja
+    st.session_state.total_chunks = contar_total_chunks(st.session_state.archivo_pyspark)
     
     archivo_destino = st.session_state.archivo_pyspark.replace(".ipynb", "_validado.ipynb")
     st.caption(f"💾 Archivo de Salida: {archivo_destino}")
     st.divider()    
     
     if st.session_state.total_chunks > 0:
-        st.progress(st.session_state.chunk_actual / st.session_state.total_chunks)
+        # 3. BLINDAJE: Usamos min() para asegurar que el valor enviado a st.progress jamás supere 1.0
+        progreso_seguro = min(1.0, st.session_state.chunk_actual / st.session_state.total_chunks)
+        st.progress(progreso_seguro)
+        
     st.write(f"**Chunk Actual:** {st.session_state.chunk_actual} / {st.session_state.total_chunks}")
     st.metric(label="Tokens Usados", value=f"{st.session_state.tokens_usados:,}")
     st.success("✅ Entorno PySpark Local: Conectado")

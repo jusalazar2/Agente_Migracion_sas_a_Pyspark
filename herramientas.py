@@ -123,3 +123,19 @@ def leer_log_sas(ruta):
     except Exception as e:
         print(f"❌ ERROR crítico leyendo el archivo Log: {str(e)}")
         return f"Error al leer el archivo Log: {str(e)}"
+    
+def contar_total_chunks(ruta="nbk_cispc157.ipynb"):
+    """
+    Lee el notebook y cuenta dinámicamente cuántas celdas de código existen.
+    """
+    ruta_segura = asegurar_ruta_data(ruta)
+    try:
+        with open(ruta_segura, 'r', encoding='utf-8') as f:
+            notebook = json.load(f)
+        
+        # Filtramos y contamos solo las celdas que son código
+        total_codigo = sum(1 for celda in notebook['cells'] if celda['cell_type'] == 'code')
+        return total_codigo if total_codigo > 0 else 1 # Evitamos divisiones por cero
+    except Exception as e:
+        print(f"❌ Error contando chunks: {e}")
+        return 1 # Valor de rescate por defecto
